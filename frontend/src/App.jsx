@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext.jsx";
+
+import LandingPage from "./pages/LandingPage.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import ResidentDashboard from "./pages/ResidentDashboard.jsx";
@@ -9,9 +11,19 @@ import NoticeBoard from "./pages/NoticeBoard.jsx";
 
 function Protected({ role, children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="centered">Loading…</div>;
-  if (!user) return <Navigate to="/login" replace />;
-  if (role && user.role !== role) return <Navigate to="/" replace />;
+
+  if (loading) {
+    return <div className="centered">Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (role && user.role !== role) {
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 }
 
@@ -25,15 +37,61 @@ function initials(name = "") {
 }
 
 function BrandMark() {
-  // A simple ticket/stub glyph — stands in for the maintenance-request slip
-  // this whole app is digitizing, rather than a generic building emoji.
   return (
-    <svg className="brand-mark" width="26" height="26" viewBox="0 0 26 26" fill="none">
-      <rect x="2" y="5" width="22" height="16" rx="3" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      <circle cx="17.5" cy="13" r="1.6" fill="currentColor" />
-      <line x1="5" y1="9" x2="12" y2="9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      <line x1="5" y1="13" x2="12" y2="13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      <line x1="5" y1="17" x2="10" y2="17" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    <svg
+      className="brand-mark"
+      width="26"
+      height="26"
+      viewBox="0 0 26 26"
+      fill="none"
+    >
+      <rect
+        x="2"
+        y="5"
+        width="22"
+        height="16"
+        rx="3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+
+      <circle
+        cx="17.5"
+        cy="13"
+        r="1.6"
+        fill="currentColor"
+      />
+
+      <line
+        x1="5"
+        y1="9"
+        x2="12"
+        y2="9"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+
+      <line
+        x1="5"
+        y1="13"
+        x2="12"
+        y2="13"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+
+      <line
+        x1="5"
+        y1="17"
+        x2="10"
+        y2="17"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -41,45 +99,81 @@ function BrandMark() {
 function Nav() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
   if (!user) return null;
 
   return (
     <nav className="navbar">
       <div className="navbar-inner">
+
         <div className="navbar-brand">
           <BrandMark />
+
           <span>
             Society Maintenance <strong>Tracker</strong>
           </span>
         </div>
 
         <div className="navbar-links">
-          <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}>
-            {user.role === "ADMIN" ? "Dashboard" : "My Complaints"}
+
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              `nav-link${isActive ? " active" : ""}`
+            }
+          >
+            {user.role === "ADMIN"
+              ? "Dashboard"
+              : "My Complaints"}
           </NavLink>
-          <NavLink to="/notices" className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}>
+
+          <NavLink
+            to="/notices"
+            className={({ isActive }) =>
+              `nav-link${isActive ? " active" : ""}`
+            }
+          >
             Notice Board
           </NavLink>
+
         </div>
 
         <div className="navbar-user">
+
           <div className="user-chip">
-            <span className="user-avatar">{initials(user.name)}</span>
-            <span className="user-meta">
-              <span className="user-name">{user.name}</span>
-              <span className="user-role">{user.role === "ADMIN" ? "Administrator" : "Resident"}</span>
+
+            <span className="user-avatar">
+              {initials(user.name)}
             </span>
+
+            <span className="user-meta">
+
+              <span className="user-name">
+                {user.name}
+              </span>
+
+              <span className="user-role">
+                {user.role === "ADMIN"
+                  ? "Administrator"
+                  : "Resident"}
+              </span>
+
+            </span>
+
           </div>
+
           <button
             className="btn-logout"
             onClick={() => {
               logout();
-              navigate("/login");
+              navigate("/");
             }}
           >
-            Sign out
+            Sign Out
           </button>
+
         </div>
+
       </div>
     </nav>
   );
@@ -90,19 +184,59 @@ export default function App() {
 
   return (
     <div className="app-shell">
+
       <Nav />
+
       <main className="app-main">
+
         <Routes>
-          <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-          <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+
+          {/* Landing Page */}
+
           <Route
             path="/"
+            element={<LandingPage />}
+          />
+
+          {/* Login */}
+
+          <Route
+            path="/login"
+            element={
+              user
+                ? <Navigate to="/dashboard" replace />
+                : <Login />
+            }
+          />
+
+          {/* Register */}
+
+          <Route
+            path="/register"
+            element={
+              user
+                ? <Navigate to="/dashboard" replace />
+                : <Register />
+            }
+          />
+
+          {/* Dashboard */}
+
+          <Route
+            path="/dashboard"
             element={
               <Protected>
-                {user?.role === "ADMIN" ? <AdminDashboard /> : <ResidentDashboard />}
+
+                {user?.role === "ADMIN"
+                  ? <AdminDashboard />
+                  : <ResidentDashboard />}
+
               </Protected>
             }
           />
+
+          {/* Complaint Details */}
+
           <Route
             path="/complaints/:id"
             element={
@@ -111,6 +245,9 @@ export default function App() {
               </Protected>
             }
           />
+
+          {/* Notice Board */}
+
           <Route
             path="/notices"
             element={
@@ -119,8 +256,18 @@ export default function App() {
               </Protected>
             }
           />
+
+          {/* Invalid Routes */}
+
+          <Route
+            path="*"
+            element={<Navigate to="/" replace />}
+          />
+
         </Routes>
+
       </main>
+
     </div>
   );
 }
