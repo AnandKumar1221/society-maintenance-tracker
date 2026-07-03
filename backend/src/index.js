@@ -24,6 +24,32 @@ app.use("/api/complaints", complaintRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
+// TEMPORARY - remove after use
+app.get("/api/run-seed-9f3k2x", async (req, res) => {
+  try {
+    const bcrypt = require("bcryptjs");
+    const { User } = require("./models");
+
+    const email = process.env.ADMIN_EMAIL || "admin@society.com";
+    const existing = await User.findOne({ where: { email } });
+    if (existing) {
+      return res.json({ message: `Admin already exists: ${email}` });
+    }
+
+    const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || "Admin@123", 10);
+    await User.create({
+      name: process.env.ADMIN_NAME || "Society Admin",
+      email,
+      passwordHash,
+      role: "ADMIN",
+    });
+
+    res.json({ message: `Admin created: ${email}` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Centralized error handler (e.g. multer file-type/size errors)
 app.use((err, req, res, next) => {
   console.error(err);
